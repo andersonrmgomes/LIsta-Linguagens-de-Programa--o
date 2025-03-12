@@ -1,39 +1,74 @@
+def quick_sort(arr, low, high):
+    if low < high:
+        pi = partition(arr, low, high)
+        quick_sort(arr, low, pi - 1)
+        quick_sort(arr, pi + 1, high)
+
+def partition(arr, low, high):
+    pivot = arr[high][0]  # Usando a coordenada x como pivô
+    i = low - 1
+    for j in range(low, high):
+        if arr[j][0] < pivot:
+            i += 1
+            arr[i], arr[j] = arr[j], arr[i]
+    arr[i + 1], arr[high] = arr[high], arr[i + 1]
+    return i + 1
+
+def max_points_on_wave(points):
+    # Ordenar os pontos usando Quick Sort
+    quick_sort(points, 0, len(points) - 1)
+
+    # Inicializar contadores para os níveis superior e inferior
+    t = [0] * len(points)
+    b = [0] * len(points)
+
+    # Contar os pontos
+    for i in range(len(points)):
+        t[i] = 1  # Inicializa o contador para o nível superior
+        b[i] = 1  # Inicializa o contador para o nível inferior
+
+    max_count = 1
+
+    for i in range(1, len(points)):
+        maxtop = 1
+        maxbot = 1
+        for j in range(i):
+            if points[i][0] > points[j][0]:  # Verifica se x[i] > x[j]
+                if points[i][1] == points[j][1] + 2:
+                    maxtop = max(maxtop, b[j] + 1)
+                elif points[i][1] == points[j][1] - 2:
+                    maxbot = max(maxbot, t[j] + 1)
+
+        t[i] = maxtop
+        b[i] = maxbot
+        max_count = max(max_count, t[i], b[i])
+
+    return max_count
+
 import sys
 
-def max_subsequencia(pontos):
-    # Ordena os pontos por coordenada x
-    pontos.sort(key=lambda x: x[0])
-    
-    # Inicializa a tabela de programação dinâmica
-    N = len(pontos)
-    DP = [[1, 1] for _ in range(N)]
-    
-    resposta = 1
-    
-    for i in range(1, N):
-        for j in range(i):
-            if pontos[i][0] == pontos[j][0]:
-                break
-            if pontos[i][1] - pontos[j][1] == 2:
-                # Descendo, acrescentando mais um no caso em que j está acima
-                DP[i][1] = max(DP[i][1], DP[j][0] + 1)
-            elif pontos[i][1] - pontos[j][1] == -2:
-                # Subindo, acrescentando mais um no caso em que j está abaixo
-                DP[i][0] = max(DP[i][0], DP[j][1] + 1)
-        resposta = max(resposta, max(DP[i][0], DP[i][1]))
-    
-    return resposta
-
-# Leitura dos dados
-while True:
+def main():
+    results = []
     try:
-        N = int(input())
-        pontos = []
-        for _ in range(N):
-            x, y = map(int, input().split())
-            pontos.append((x, y))
-        
-        print(max_subsequencia(pontos))
+        while True:
+            line = input().strip()
+            if not line:  # Ignora linhas em branco
+                continue
+            n = int(line)
+            points = []
+            for _ in range(n):
+                point_line = input().strip()
+                if point_line:  # Verifica se a linha não está vazia
+                    x, y = map(int, point_line.split())
+                    points.append((x, y))
+            results.append(max_points_on_wave(points))
     except EOFError:
-        break
-    
+        pass  # Finaliza a leitura ao atingir o final do arquivo
+    except ValueError:
+        return  # Se houver erro de entrada, simplesmente retorna sem imprimir nada
+
+    for result in results:
+        print(result)
+
+if __name__ == "__main__":
+    main()
